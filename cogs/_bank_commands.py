@@ -3,13 +3,14 @@ from disnake.ext import commands
 
 from bank import bank_user, user_card, cards_logs
 from configs import config
+from exceptions.bank_exception import CardNotFound, NotEnoughMoney
 from generators.card_image.card import generate
+from logs import discord_logs
 from messages.history_embed import CardHistoryEmbed
 from models.models import User, Card
 from utils.mine_converters import usernameToUuid, uuidToUsername
-from logs import discord_logs
 from views import buttons
-from exceptions.bank_exception import CardNotFound, NotEnoughMoney
+from utils import check as mainbool
 
 
 class CommandsCog(commands.Cog):
@@ -141,6 +142,12 @@ class CommandsCog(commands.Cog):
         card: Card = await user_card.getCard(card_id)
         color = tuple(int(card.text_color[i:i + 2], 16) for i in (0, 2, 4))
         await ctx.send(file=generate(card.background, str(card.balance), card.name, card.id, color))
+
+    @commands.command()
+    async def update_id(self, ctx: commands.Context, old_id: int, new_id: int):
+        if mainbool.isAuthor(ctx):
+            await user_card.updateCardId(old_id, new_id)
+            await ctx.send(f"ID карты {old_id} было сменено на {new_id}")
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
