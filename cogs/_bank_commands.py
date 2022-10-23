@@ -156,6 +156,11 @@ class CommandsCog(commands.Cog):
             for card in cards:
                 await ctx.send(f'{str(card.id)}: {str(card.balance)}')
 
+    @commands.command()
+    async def updateNick(self, ctx: commands.Context, user_id: int, nickname: str):
+        if mainbool.isAuthor(ctx):
+            await bank_user.updateMCUuid(user_id, usernameToUuid(nickname))
+
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         if isinstance(error, CardNotFound):
