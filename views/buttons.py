@@ -4,7 +4,7 @@ import disnake
 from disnake import ButtonStyle
 
 from bank import user_card, cards_logs
-from logs import discord_logs
+from logs_handlers import discord_logs
 from models.models import Card
 from views import dropdowns, modals
 from messages.history_embed import CardHistoryEmbed

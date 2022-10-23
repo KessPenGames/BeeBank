@@ -4,7 +4,7 @@ from bank import user_card, cards_logs
 from configs import config
 from exceptions.bank_exception import NotEnoughMoney, CardNotFound
 from generators.card_id import generate
-from logs import discord_logs
+from logs_handlers import discord_logs
 from models.models import Card
 from utils.mine_converters import uuidToUsername
 from utils.check import isHex

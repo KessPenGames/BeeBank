@@ -5,7 +5,7 @@ from bank import bank_user, user_card, cards_logs
 from configs import config
 from exceptions.bank_exception import CardNotFound, NotEnoughMoney
 from generators.card_image.card import generate
-from logs import discord_logs
+from logs_handlers import discord_logs
 from messages.history_embed import CardHistoryEmbed
 from models.models import User, Card
 from utils.mine_converters import usernameToUuid, uuidToUsername
@@ -61,6 +61,9 @@ class CommandsCog(commands.Cog):
         name = "Стандартный счёт" if name != " " and "" else name
         if await bank_user.getUser(user_id):
             card = await user_card.addCard(user_id, name)
+            await user_card.addMoney(config.getAttr("grant-card-id"), 5)
+            await cards_logs.addLog(1, config.getAttr("bank-card-id"), card.id,
+                                    f'5|Банкир {ctx.author.name}, создание карты.')
             await ctx.send(f"Была создана карта **{name}** под номером **{card.id}** для **{card.user}**")
             await discord_logs.sendLog(
                 ctx.guild, 4,

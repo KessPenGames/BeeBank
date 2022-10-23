@@ -8,7 +8,7 @@ bot-prefix: 'BeeBot'
 bot-status: 'Bee Lines'
 admin-id: 866553002172743701
 guild-id: 765888901167972352
-logs-channel-id: 847795886498512906
+logs_handlers-channel-id: 847795886498512906
 banker-role-id: 785727770394230835
 bank-card-id: 000000
 grant-card-id: 000000
