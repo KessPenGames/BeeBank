@@ -95,7 +95,7 @@ class PaymentModal(disnake.ui.Modal):
 
     async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
         print(error)
-        await inter.response.send_message("Упс, ошибочка.", ephemeral=True)
+        await inter.edit_original_message("Упс, ошибочка.")
 
 
 class ChangeColorModal(disnake.ui.Modal):
@@ -125,7 +125,7 @@ class ChangeColorModal(disnake.ui.Modal):
 
     async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
         print(error)
-        await inter.response.send_message("Упс, ошибочка.", ephemeral=True)
+        await inter.edit_original_message("Упс, ошибочка.")
 
 
 class ChangeNameModal(disnake.ui.Modal):
@@ -173,4 +173,4 @@ class ChangeNameModal(disnake.ui.Modal):
 
     async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
         print(error)
-        await inter.response.send_message("Упс, ошибочка.", ephemeral=True)
+        await inter.edit_original_message("Упс, ошибочка.")
