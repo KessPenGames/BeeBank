@@ -116,7 +116,5 @@ async def removeMoney(card_id: int, amount: int):
 
 
 async def sendMoney(sender_card: int, receiver_card: int, amount: int):
-    if receiver_card == config.getAttr("grant-card-id") or config.getAttr("bank-card-id"):
-        return
     await removeMoney(sender_card, amount)
     await addMoney(receiver_card, amount)

@@ -52,38 +52,39 @@ class PaymentModal(disnake.ui.Modal):
             amount = int(inter.text_values["amount"])
             comments = inter.text_values["comments"]
             if amount > 0:
-                await user_card.sendMoney(sender_card, receiver_card, amount)
-                await cards_logs.addLog(1, receiver_card, sender_card, str(amount) + '|' + comments)
-                await cards_logs.addLog(2, sender_card, receiver_card, str(amount) + '|' + comments)
+                if receiver_card != config.getAttr("grant-card-id") or config.getAttr("bank-card-id"):
+                    await user_card.sendMoney(sender_card, receiver_card, amount)
+                    await cards_logs.addLog(1, receiver_card, sender_card, str(amount) + '|' + comments)
+                    await cards_logs.addLog(2, sender_card, receiver_card, str(amount) + '|' + comments)
 
-                sender = await user_card.getCard(sender_card)
-                receiver = await user_card.getCard(receiver_card)
+                    sender = await user_card.getCard(sender_card)
+                    receiver = await user_card.getCard(receiver_card)
 
-                await discord_logs.sendLog(
-                    inter.guild, 1,
-                    uuidToUsername(receiver.user.mc_uuid),
-                    uuidToUsername(sender.user.mc_uuid),
-                    str(amount) + '|' + comments
-                )
-                await discord_logs.sendLog(
-                    inter.guild, 2,
-                    uuidToUsername(sender.user.mc_uuid),
-                    uuidToUsername(receiver.user.mc_uuid),
-                    str(amount) + '|' + comments
-                )
+                    await discord_logs.sendLog(
+                        inter.guild, 1,
+                        uuidToUsername(receiver.user.mc_uuid),
+                        uuidToUsername(sender.user.mc_uuid),
+                        str(amount) + '|' + comments
+                    )
+                    await discord_logs.sendLog(
+                        inter.guild, 2,
+                        uuidToUsername(sender.user.mc_uuid),
+                        uuidToUsername(receiver.user.mc_uuid),
+                        str(amount) + '|' + comments
+                    )
 
-                await discord_logs.sendNotification(
-                    inter.guild.get_member(receiver.user.discord_id), 1,
-                    uuidToUsername(sender.user.mc_uuid),
-                    str(amount) + '|' + comments
-                )
-                await discord_logs.sendNotification(
-                    inter.guild.get_member(sender.user.discord_id), 2,
-                    sender.name, str(amount)
-                )
+                    await discord_logs.sendNotification(
+                        inter.guild.get_member(receiver.user.discord_id), 1,
+                        uuidToUsername(sender.user.mc_uuid),
+                        str(amount) + '|' + comments
+                    )
+                    await discord_logs.sendNotification(
+                        inter.guild.get_member(sender.user.discord_id), 2,
+                        sender.name, str(amount)
+                    )
 
-                await inter.edit_original_message(f"Вы успешно перевели **{str(amount)}АР**, "
-                                                  f"на карту **{str(receiver_card)}**.")
+                    await inter.edit_original_message(f"Вы успешно перевели **{str(amount)}АР**, "
+                                                      f"на карту **{str(receiver_card)}**.")
             else:
                 await inter.edit_original_message("Введена неверная сумма для перевода!")
         except CardNotFound as error:
