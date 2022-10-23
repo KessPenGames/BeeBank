@@ -18,7 +18,7 @@ notifications = [
 
 async def sendLog(guild: disnake.Guild, log_type: int, sender, receiver, datas: str):
     guild_id = config.getAttr("guild-id")
-    channel_id = config.getAttr("logs_handlers-channel-id")
+    channel_id = config.getAttr("logs-channel-id")
 
     if guild.id == guild_id:
         channel = guild.get_channel(channel_id)
