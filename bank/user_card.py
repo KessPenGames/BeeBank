@@ -93,6 +93,13 @@ async def getCardsByUserId(user_id: int):
     return cards
 
 
+async def getAllCards():
+    session = Session()
+    cards = session.query(Card).all()
+    session.close()
+    return cards
+
+
 async def addMoney(card_id: int, amount: int):
     card = await getCard(card_id)
     await updateBalance(card_id, card.balance + amount)

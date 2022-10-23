@@ -149,6 +149,13 @@ class CommandsCog(commands.Cog):
             await user_card.updateCardId(old_id, new_id)
             await ctx.send(f"ID карты {old_id} было сменено на {new_id}")
 
+    @commands.command()
+    async def getAllCards(self, ctx: commands.Context):
+        if mainbool.isAuthor(ctx):
+            cards = await user_card.getAllCards()
+            for card in cards:
+                await ctx.send(f'{str(card.id)}: {str(card.balance)}')
+
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         if isinstance(error, CardNotFound):
