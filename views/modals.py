@@ -1,17 +1,18 @@
 import disnake
 
-from bank import user_card, cards_logs
+from bank import user_card, cards_logs, bank_user
 from configs import config
 from exceptions.bank_exception import NotEnoughMoney, CardNotFound
 from generators.card_id import generate
 from logs_handlers import discord_logs
-from models.models import Card
+from models.models import Card, User
 from utils.mine_converters import uuidToUsername
 from utils.check import isHex
+from views import dropdowns
 
 
 class PaymentModal(disnake.ui.Modal):
-    def __init__(self, card_id) -> None:
+    def __init__(self, card_id, receiver=None) -> None:
         self.card_id = card_id
         components = [
             disnake.ui.TextInput(
@@ -21,6 +22,7 @@ class PaymentModal(disnake.ui.Modal):
                 style=disnake.TextInputStyle.short,
                 min_length=5,
                 max_length=6,
+                value=receiver,
                 required=True,
             ),
             disnake.ui.TextInput(
@@ -52,7 +54,10 @@ class PaymentModal(disnake.ui.Modal):
             amount = int(inter.text_values["amount"])
             comments = inter.text_values["comments"]
             if amount > 0:
-                if receiver_card != config.getAttr("grant-card-id") or config.getAttr("bank-card-id"):
+                if receiver_card == sender_card:
+                    await inter.edit_original_message("Вы не можете переводить самому себе.")
+                    return
+                if receiver_card != config.getAttr("bank-card-id"):
                     await user_card.sendMoney(sender_card, receiver_card, amount)
                     await cards_logs.addLog(1, receiver_card, sender_card, str(amount) + '|' + comments)
                     await cards_logs.addLog(2, sender_card, receiver_card, str(amount) + '|' + comments)
@@ -99,6 +104,77 @@ class PaymentModal(disnake.ui.Modal):
         await inter.edit_original_message("Упс, ошибочка.")
 
 
+class SearchCardByNick(disnake.ui.Modal):
+    def __init__(self, card_id, isPaymentSearch: bool) -> None:
+        self.card_id = card_id
+        self.isPaymentSearch = isPaymentSearch
+        components = [
+            disnake.ui.TextInput(
+                label="Никнейм владельца карты",
+                placeholder="Никнейм...",
+                custom_id="nickname",
+                style=disnake.TextInputStyle.short,
+                min_length=1,
+                max_length=32,
+                required=True,
+            )
+        ]
+        super().__init__(title="Перевод игроку", custom_id="payment", components=components)
+
+    async def callback(self, inter: disnake.ModalInteraction) -> None:
+        await inter.response.defer(with_message=True, ephemeral=True)
+        nickname = inter.text_values["nickname"]
+        user: User = await bank_user.getUserByNickname(nickname)
+        options = await getOptionsByUserId(inter, user.discord_id, self.card_id)
+        if options:
+            if self.isPaymentSearch:
+                await inter.edit_original_message(
+                    "Найдены следующие карты:",
+                    view=dropdowns.DropdownView(dropdowns.PaymentByNick(options, self.card_id))
+                )
+            else:
+                pass
+
+    async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
+        print(error)
+        await inter.edit_original_message("Упс, ошибочка.")
+
+
+class SearchCardByCardName(disnake.ui.Modal):
+    def __init__(self, card_id, isPaymentSearch: bool) -> None:
+        self.card_id = card_id
+        self.isPaymentSearch = isPaymentSearch
+        components = [
+            disnake.ui.TextInput(
+                label="Название карты",
+                placeholder="Название карты...",
+                custom_id="name",
+                style=disnake.TextInputStyle.short,
+                min_length=1,
+                max_length=128,
+                required=True,
+            )
+        ]
+        super().__init__(title="Перевод игроку", custom_id="payment", components=components)
+
+    async def callback(self, inter: disnake.ModalInteraction) -> None:
+        await inter.response.defer(with_message=True, ephemeral=True)
+        name = inter.text_values["name"]
+        options = await getOptionsByCards(inter, await user_card.getCardsByCardName(name), self.card_id)
+        if options:
+            if self.isPaymentSearch:
+                await inter.edit_original_message(
+                    "Найдены следующие карты:",
+                    view=dropdowns.DropdownView(dropdowns.PaymentByNick(options, self.card_id))
+                )
+            else:
+                pass
+
+    async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
+        print(error)
+        await inter.edit_original_message("Упс, ошибочка.")
+
+
 class ChangeColorModal(disnake.ui.Modal):
     def __init__(self, card_id) -> None:
         self.card_id = card_id
@@ -118,7 +194,7 @@ class ChangeColorModal(disnake.ui.Modal):
     async def callback(self, inter: disnake.ModalInteraction) -> None:
         await inter.response.defer(with_message=True, ephemeral=True)
         hexColor = str(inter.text_values["hex"]).replace("#", "")
-        if isHex('#'+hexColor):
+        if isHex('#' + hexColor):
             await user_card.updateColor(self.card_id, hexColor)
             await inter.edit_original_message("Цвет текста успешно изменён.")
         else:
@@ -150,7 +226,6 @@ class ChangeNameModal(disnake.ui.Modal):
         card: Card = await user_card.getCard(self.card_id)
         if card.balance >= 8:
             await user_card.sendMoney(card.id, config.getAttr("grant-card-id"), 8)
-            await user_card.removeMoney(config.getAttr("bank-card-id"), 8)
 
             await cards_logs.addLog(2, card.id, config.getAttr("grant-card-id"), '8|Оплата переоткрытия карты')
             await cards_logs.addLog(2, config.getAttr("grant-card-id"), card.id, '8|Оплата переоткрытия карты')
@@ -175,3 +250,38 @@ class ChangeNameModal(disnake.ui.Modal):
     async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
         print(error)
         await inter.edit_original_message("Упс, ошибочка.")
+
+
+async def getOptionsByUserId(inter: disnake.ModalInteraction, discord_id: int, sender_card: int):
+    cards = await user_card.getCardsByUserId(discord_id)
+    if not cards.first():
+        await inter.edit_original_message("Карты у данного пользователя не найдены!")
+        return None
+    options = await getOptions(cards, sender_card)
+    if not options:
+        await inter.edit_original_message("Вы ищите самого себя.")
+        return None
+    return options
+
+
+async def getOptionsByCards(inter: disnake.ModalInteraction, cards, sender_card: int):
+    if not cards.first():
+        await inter.edit_original_message("Карты с таким названием не найдены!")
+        return None
+    options = await getOptions(cards, sender_card)
+    if not options:
+        await inter.edit_original_message("Вы ищите самого себя.")
+        return None
+    return options
+
+
+async def getOptions(cards, sender_card: int):
+    options = []
+    for card in cards:
+        if card.id == sender_card:
+            return None
+        option = disnake.SelectOption(
+            label=card.id, description=f"Банковская карта {card.name}"
+        )
+        options.append(option)
+    return options

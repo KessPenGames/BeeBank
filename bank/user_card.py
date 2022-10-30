@@ -2,7 +2,6 @@ from database.database import Session
 from models.models import Card
 
 from exceptions.bank_exception import NotEnoughMoney, CardNotFound
-from configs import config
 
 
 async def addCard(discord_id: int, name: str):
@@ -90,6 +89,13 @@ async def removeCard(card_id: int):
 async def getCardsByUserId(user_id: int):
     session = Session()
     cards = session.query(Card).filter(Card.user_id == user_id)
+    session.close()
+    return cards
+
+
+async def getCardsByCardName(name: str):
+    session = Session()
+    cards = session.query(Card).filter(Card.name == name)
     session.close()
     return cards
 

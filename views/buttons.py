@@ -27,7 +27,7 @@ class BankButtons(disnake.ui.View):
             await inter.edit_original_message(view=dropdowns.DropdownView(dropdowns.Payment(options)))
 
     @disnake.ui.button(
-        emoji="<:balance:1026796289968578620>", label="Узнать баланс", style=style, custom_id="bank:balance"
+        emoji="<:balance:1026796289968578620>", label="Меню карты", style=style, custom_id="bank:card"
     )
     async def balance(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
         await inter.response.defer(with_message=True, ephemeral=True)
@@ -121,10 +121,9 @@ class CardButtons(disnake.ui.View):
                 user = inter.bot.get_user(config.getAttr("admin-id"))
                 await user.send(str(card.id), file=disnake.File("background.png"), view=BackCheckButtons(card.id, msg.author))
                 await user_card.sendMoney(card.id, config.getAttr("grant-card-id"), 10)
-                await user_card.removeMoney(config.getAttr("bank-card-id"), 10)
 
                 await cards_logs.addLog(2, card.id, config.getAttr("grant-card-id"), '10|Оплата смены фона')
-                await cards_logs.addLog(2, config.getAttr("grant-card-id"), card.id, '10|Оплата смены фона')
+                await cards_logs.addLog(1, config.getAttr("grant-card-id"), card.id, '10|Оплата смены фона')
                 await discord_logs.sendNotification(msg.author, 2, card.name, "10")
             else:
                 await msg.channel.send("Вам не хватает АР для смены фона.")
@@ -184,8 +183,8 @@ class BackCheckButtons(disnake.ui.View):
     @disnake.ui.button(emoji="❌", style=style, custom_id="check:no")
     async def no(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
         card = await user_card.getCard(self.card_id[0])
-        await self.user.send(f"Заявку на смену фона вашей карты **{card.name}** был отменён.\n"
-                             f"Причиной этого может служить содержание **Непристойного контента**.")
+        await self.user.send(f"Заявку на смену фона вашей карты **{card.name}** была отменена.\n"
+                             f"Причиной этого может служить содержание **Непристойного контента** или другие причины.")
 
         msg = inter.message
         await msg.delete()

@@ -8,7 +8,9 @@ from database.create_database import create_database
 cogs = [
     "start",
     "bank_commands",
-    "bank_message"
+    "get_commands",
+    "create_commands",
+    "update_commands"
 ]
 cog = "cogs._"
 

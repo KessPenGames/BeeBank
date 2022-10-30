@@ -37,11 +37,18 @@ class CardHistoryEmbed:
                 log: CardLog = self.logs[i]
                 typeLog = "(+)" if log.log_type == 1 else "(-)"
                 balance, comments = log.other_data.split("|")
-                embed.add_field(
-                    name=f"{typeLog} {log.two_card.user} Сумма: {balance}АР",
-                    value=f"{comments}\nДата: {log.date}",
-                    inline=False
-                )
+                try:
+                    embed.add_field(
+                        name=f"{typeLog} {log.two_card.user} Сумма: {balance}АР",
+                        value=f"{comments}\nДата: {log.date}",
+                        inline=False
+                    )
+                except AttributeError:
+                    embed.add_field(
+                        name=f"{typeLog} None Сумма: {balance}АР",
+                        value=f"{comments}\nДата: {log.date}",
+                        inline=False
+                    )
             except IndexError:
                 continue
         return embed

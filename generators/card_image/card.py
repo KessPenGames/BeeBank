@@ -39,15 +39,15 @@ def generate(background: str, balance: str, name: str, card: int, color):
 
     draw = ImageDraw.Draw(img)
 
-    draw.text((35, 40), "BEE", font=font_86, fill=color)
-    draw.text((595, 500), str(card), font=font_86, fill=color)
-    draw.text((35, 440), str(balance) + " АР", font=font_86, fill=color)
+    draw.text((35, 40), "BEE", color, font_86)
+    draw.text((930, 580), str(card), color, font_86, anchor="rs")
+    draw.text((35, 440), str(balance) + " АР", color, font_86)
 
-    draw.text((215, 78), "bank", font=font_36, fill=color)
-    draw.text((40, 125), name, font=font_36, fill=color)
+    draw.text((215, 78), "bank", color, font_36)
+    draw.text((40, 125), name, color, font_36)
 
     remainder = f'{int(balance) // 64} ст. ' if int(balance) // 64 > 0 else ''
-    draw.text((65, 515), f'{remainder}{int(balance) % 64} ар', font=font_36, fill=color)
+    draw.text((65, 515), f'{remainder}{int(balance) % 64} ар', color, font_36)
 
     img.save(f'{abs_path}img.png')
     return disnake.File(f'{abs_path}img.png')

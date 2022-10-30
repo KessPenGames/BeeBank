@@ -17,7 +17,50 @@ class Payment(disnake.ui.Select):
         )
 
     async def callback(self, inter: disnake.MessageInteraction):
-        await inter.response.send_modal(modal=modals.PaymentModal(int(self.values[0])))
+        await inter.response.send_message(view=DropdownView(PaymentTypes(int(self.values[0]))), ephemeral=True)
+
+
+class PaymentByNick(disnake.ui.Select):
+    def __init__(self, options, card):
+        self.card = card
+        super().__init__(
+            placeholder="Выберите карту",
+            min_values=1,
+            max_values=1,
+            options=options,
+        )
+
+    async def callback(self, inter: disnake.MessageInteraction):
+        await inter.response.send_modal(modal=modals.PaymentModal(self.card, self.values[0]))
+
+
+class PaymentTypes(disnake.ui.Select):
+    def __init__(self, card):
+        super().__init__(
+            placeholder="Выберите тип перевода",
+            min_values=1,
+            max_values=1,
+            options=[
+                disnake.SelectOption(
+                    label="По номеру карты", description="Перевести АРы по номеру карты"
+                ),
+                disnake.SelectOption(
+                    label="По никнейму", description="Перевести АРы по никнейму владельца карты"
+                ),
+                disnake.SelectOption(
+                    label="По названию карты", description="Перевести АРы по названию карты"
+                ),
+            ],
+        )
+        self.card = card
+
+    async def callback(self, inter: disnake.MessageInteraction):
+        if self.values[0] == "По номеру карты":
+            await inter.response.send_modal(modal=modals.PaymentModal(self.card))
+        elif self.values[0] == "По никнейму":
+            await inter.response.send_modal(modal=modals.SearchCardByNick(self.card, True))
+        else:
+            await inter.response.send_modal(modal=modals.SearchCardByCardName(self.card, True))
 
 
 class Balance(disnake.ui.Select):

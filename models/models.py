@@ -35,6 +35,7 @@ class Card(Base):
     background = Column(Text, default=random_img())
     text_color = Column(String, default="ffffff")
     balance = Column(Integer, default=0)
+    votes = Column(Integer, default=0)
     date = Column(DateTime(timezone=True), server_default=func.now())
     user_id = Column(Integer, ForeignKey('bank_user.discord_id', ondelete='CASCADE'))
 
