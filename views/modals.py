@@ -125,6 +125,9 @@ class SearchCardByNick(disnake.ui.Modal):
         await inter.response.defer(with_message=True, ephemeral=True)
         nickname = inter.text_values["nickname"]
         user: User = await bank_user.getUserByNickname(nickname)
+        if not user:
+            await inter.edit_original_message("Карты у данного пользователя не найдены!")
+            return
         options = await getOptionsByUserId(inter, user.discord_id, self.card_id)
         if options:
             if self.isPaymentSearch:
