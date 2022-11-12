@@ -10,7 +10,8 @@ cogs = [
     "bank_commands",
     "get_commands",
     "create_commands",
-    "update_commands"
+    "update_commands",
+    "backup"
 ]
 cog = "cogs._"
 

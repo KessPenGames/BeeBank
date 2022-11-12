@@ -44,6 +44,13 @@ class BankButtons(disnake.ui.View):
         if options:
             await inter.edit_original_message(view=dropdowns.DropdownView(dropdowns.History(options)))
 
+    @disnake.ui.button(
+        emoji="<:user:1040540868446273616>", label="Посмотреть чужую карту", style=style, custom_id="bank:getcard"
+    )
+    async def getcard(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+        await inter.response.defer(with_message=True, ephemeral=True)
+        await inter.edit_original_message(view=dropdowns.DropdownView(dropdowns.SearchCard(0)))
+
 
 class HistoryButtons(disnake.ui.View):
     def __init__(self, isNext: bool, isPrevious: bool, page: int, card_id: int):

@@ -39,7 +39,7 @@ class PaymentModal(disnake.ui.Modal):
                 custom_id="comments",
                 style=disnake.TextInputStyle.paragraph,
                 min_length=5,
-                max_length=1024,
+                max_length=48,
                 required=True,
                 value="Нет комментариев"
             ),
@@ -104,6 +104,43 @@ class PaymentModal(disnake.ui.Modal):
         await inter.edit_original_message("Упс, ошибочка.")
 
 
+class SearchCardById(disnake.ui.Modal):
+    def __init__(self, card_id) -> None:
+        self.card_id = card_id
+        components = [
+            disnake.ui.TextInput(
+                label="Номер карты",
+                placeholder="Никнейм...",
+                custom_id="card",
+                style=disnake.TextInputStyle.short,
+                min_length=5,
+                max_length=6,
+                required=True,
+            )
+        ]
+        super().__init__(title="Поиск карты", custom_id="searccardbyid", components=components)
+
+    async def callback(self, inter: disnake.ModalInteraction) -> None:
+        try:
+            await inter.response.defer(with_message=True, ephemeral=True)
+            card_id = int(inter.text_values["card"])
+            card: Card = await user_card.getCard(card_id)
+            options = await getOptionsByUserId(inter, card.user.discord_id, self.card_id)
+            if options:
+                await inter.edit_original_message(
+                    "Найдены следующие карты:",
+                    view=dropdowns.DropdownView(dropdowns.GetCard(options))
+                )
+        except CardNotFound:
+            await inter.edit_original_message("Карты у данного пользователя не найдены!")
+        except ValueError:
+            await inter.edit_original_message("Введена неверная карта пользователя.")
+
+    async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
+        print(error)
+        await inter.edit_original_message("Упс, ошибочка.")
+
+
 class SearchCardByNick(disnake.ui.Modal):
     def __init__(self, card_id, isPaymentSearch: bool) -> None:
         self.card_id = card_id
@@ -119,7 +156,7 @@ class SearchCardByNick(disnake.ui.Modal):
                 required=True,
             )
         ]
-        super().__init__(title="Перевод игроку", custom_id="payment", components=components)
+        super().__init__(title="Поиск карты", custom_id="searccardbynick", components=components)
 
     async def callback(self, inter: disnake.ModalInteraction) -> None:
         await inter.response.defer(with_message=True, ephemeral=True)
@@ -136,7 +173,10 @@ class SearchCardByNick(disnake.ui.Modal):
                     view=dropdowns.DropdownView(dropdowns.PaymentByNick(options, self.card_id))
                 )
             else:
-                pass
+                await inter.edit_original_message(
+                    "Найдены следующие карты:",
+                    view=dropdowns.DropdownView(dropdowns.GetCard(options))
+                )
 
     async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
         print(error)
@@ -158,7 +198,7 @@ class SearchCardByCardName(disnake.ui.Modal):
                 required=True,
             )
         ]
-        super().__init__(title="Перевод игроку", custom_id="payment", components=components)
+        super().__init__(title="Поиск карты", custom_id="searchcardbyname", components=components)
 
     async def callback(self, inter: disnake.ModalInteraction) -> None:
         await inter.response.defer(with_message=True, ephemeral=True)
@@ -171,7 +211,10 @@ class SearchCardByCardName(disnake.ui.Modal):
                     view=dropdowns.DropdownView(dropdowns.PaymentByNick(options, self.card_id))
                 )
             else:
-                pass
+                await inter.edit_original_message(
+                    "Найдены следующие карты:",
+                    view=dropdowns.DropdownView(dropdowns.GetCard(options))
+                )
 
     async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
         print(error)
@@ -221,7 +264,7 @@ class ChangeNameModal(disnake.ui.Modal):
                 required=True
             )
         ]
-        super().__init__(title="Смена цвета текста", custom_id="changecolor", components=components)
+        super().__init__(title="Смена название карты", custom_id="changename", components=components)
 
     async def callback(self, inter: disnake.ModalInteraction) -> None:
         await inter.response.defer(with_message=True, ephemeral=True)

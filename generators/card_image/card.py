@@ -46,8 +46,9 @@ def generate(background: str, balance: str, name: str, card: int, color):
     draw.text((215, 78), "bank", color, font_36)
     draw.text((40, 125), name, color, font_36)
 
-    remainder = f'{int(balance) // 64} ст. ' if int(balance) // 64 > 0 else ''
-    draw.text((65, 515), f'{remainder}{int(balance) % 64} ар', color, font_36)
+    if balance != "***":
+        remainder = f'{int(balance) // 64} ст. ' if int(balance) // 64 > 0 else ''
+        draw.text((65, 515), f'{remainder}{int(balance) % 64} ар', color, font_36)
 
     img.save(f'{abs_path}img.png')
     return disnake.File(f'{abs_path}img.png')

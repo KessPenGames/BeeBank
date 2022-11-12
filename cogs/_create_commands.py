@@ -29,9 +29,9 @@ class CreateCommandsCog(commands.Cog):
         name = "Стандартный счёт" if name != " " and "" else name
         if await bank_user.getUser(user_id):
             card = await user_card.addCard(user_id, name)
-            await user_card.addMoney(config.getAttr("grant-card-id"), 5)
-            await cards_logs.addLog(1, config.getAttr("grant-card-id"), card.id,
-                                    f'5|Банкир {ctx.author.name}, создание карты.')
+            #await user_card.addMoney(config.getAttr("grant-card-id"), 5)
+            #await cards_logs.addLog(1, config.getAttr("grant-card-id"), card.id,
+            #                        f'5|Банкир {ctx.author.name}, создание карты.')
             await ctx.send(f"Была создана карта **{name}** под номером **{card.id}** для **{card.user}**")
             await discord_logs.sendLog(
                 ctx.guild, 4,

@@ -5,6 +5,7 @@ from generators.card_image.card import generate
 from models.models import Card
 from views import modals, buttons
 from messages.history_embed import CardHistoryEmbed
+from configs import config
 
 
 class Payment(disnake.ui.Select):
@@ -34,6 +35,31 @@ class PaymentByNick(disnake.ui.Select):
         await inter.response.send_modal(modal=modals.PaymentModal(self.card, self.values[0]))
 
 
+class GetCard(disnake.ui.Select):
+    def __init__(self, options):
+        super().__init__(
+            placeholder="Выберите карту",
+            min_values=1,
+            max_values=1,
+            options=options,
+        )
+
+    async def callback(self, inter: disnake.MessageInteraction):
+        await inter.response.defer(with_message=True, ephemeral=True)
+        card_id = int(self.values[0])
+        card: Card = await user_card.getCard(card_id)
+        color = tuple(int(card.text_color[i:i + 2], 16) for i in (0, 2, 4))
+        author = inter.guild.get_member(inter.author.id)
+        if author.get_role(config.getAttr("banker-role-id")):
+            await inter.edit_original_message(
+                file=generate(card.background, str(card.balance), card.name, card.id, color)
+            )
+        else:
+            await inter.edit_original_message(
+                file=generate(card.background, "***", card.name, card.id, color)
+            )
+
+
 class PaymentTypes(disnake.ui.Select):
     def __init__(self, card):
         super().__init__(
@@ -61,6 +87,35 @@ class PaymentTypes(disnake.ui.Select):
             await inter.response.send_modal(modal=modals.SearchCardByNick(self.card, True))
         else:
             await inter.response.send_modal(modal=modals.SearchCardByCardName(self.card, True))
+
+
+class SearchCard(disnake.ui.Select):
+    def __init__(self, card):
+        super().__init__(
+            placeholder="Выберите тип поиска",
+            min_values=1,
+            max_values=1,
+            options=[
+                disnake.SelectOption(
+                    label="По номеру карты", description="Найти карту по номеру карты"
+                ),
+                disnake.SelectOption(
+                    label="По никнейму", description="Найти карту по никнейму владельца карты"
+                ),
+                disnake.SelectOption(
+                    label="По названию карты", description="Найти карту по названию карты"
+                ),
+            ],
+        )
+        self.card = card
+
+    async def callback(self, inter: disnake.MessageInteraction):
+        if self.values[0] == "По номеру карты":
+            await inter.response.send_modal(modal=modals.SearchCardById(self.card))
+        elif self.values[0] == "По никнейму":
+            await inter.response.send_modal(modal=modals.SearchCardByNick(self.card, False))
+        else:
+            await inter.response.send_modal(modal=modals.SearchCardByCardName(self.card, False))
 
 
 class Balance(disnake.ui.Select):

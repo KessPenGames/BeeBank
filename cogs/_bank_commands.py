@@ -74,7 +74,7 @@ class CommandsCog(commands.Cog):
     @commands.command()
     async def send(self, ctx: commands.Context):
         if mainbool.isAuthor(ctx):
-            await ctx.channel.purge(limit=100)
+            await ctx.channel.purge(limit=10)
             await ctx.send(
                 "Приветствую вас в меню управлением **BeeBank**, здесь представлены основные,"
                 " доступные вам функции.", view=buttons.BankButtons()
