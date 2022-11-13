@@ -1,5 +1,6 @@
 from database.database import Session
 from models.models import CardLog
+from utils import variables
 
 
 async def addLog(log_type: int, one_card_id: int, two_card_id: int, other_data: str):
@@ -8,6 +9,7 @@ async def addLog(log_type: int, one_card_id: int, two_card_id: int, other_data: 
     session.add(log)
     session.commit()
     session.close()
+    variables.isUpdated = True
 
 
 async def getLogsByCard(card_id: int, isOneCard: bool = True):
@@ -34,6 +36,7 @@ async def removeAllLogsByCard(card_id: int, isOneCard: bool = True):
             session.delete(log)
             session.commit()
     session.close()
+    variables.isUpdated = True
 
 
 def logsToList(logs):
@@ -50,6 +53,7 @@ async def updateOneCard(old_id: int, new_id: int):
         cards.update({"one_card_id": new_id})
         session.commit()
     session.close()
+    variables.isUpdated = True
 
 
 async def updateTwoCard(old_id: int, new_id: int):
@@ -59,3 +63,4 @@ async def updateTwoCard(old_id: int, new_id: int):
         cards.update({"two_card_id": new_id})
         session.commit()
     session.close()
+    variables.isUpdated = True

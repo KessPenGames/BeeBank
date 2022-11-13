@@ -2,6 +2,7 @@ from database.database import Session
 from models.models import Card
 
 from exceptions.bank_exception import NotEnoughMoney, CardNotFound
+from utils import variables
 
 
 async def addCard(discord_id: int, name: str):
@@ -11,6 +12,7 @@ async def addCard(discord_id: int, name: str):
     session.commit()
     card = session.query(Card).filter(Card.id == card.id).first()
     session.close()
+    variables.isUpdated = True
     return card
 
 
@@ -39,6 +41,7 @@ async def updateCardId(old_id: int, new_id: int):
         cards.update({"id": new_id})
         session.commit()
     session.close()
+    variables.isUpdated = True
 
 
 async def updateName(card_id: int, name: str):
@@ -48,6 +51,7 @@ async def updateName(card_id: int, name: str):
         cards.update({"name": name})
         session.commit()
     session.close()
+    variables.isUpdated = True
 
 
 async def updateColor(card_id: int, color: str):
@@ -57,6 +61,7 @@ async def updateColor(card_id: int, color: str):
         cards.update({"text_color": color})
         session.commit()
     session.close()
+    variables.isUpdated = True
 
 
 async def updateImage(card_id: int, image_bs64: str):
@@ -66,6 +71,7 @@ async def updateImage(card_id: int, image_bs64: str):
         cards.update({"background": image_bs64})
         session.commit()
     session.close()
+    variables.isUpdated = True
 
 
 async def updateBalance(card_id: int, new_balance: int):
@@ -75,6 +81,7 @@ async def updateBalance(card_id: int, new_balance: int):
         cards.update({"balance": new_balance})
         session.commit()
     session.close()
+    variables.isUpdated = True
 
 
 async def removeCard(card_id: int):
@@ -84,6 +91,7 @@ async def removeCard(card_id: int):
         session.delete(card)
         session.commit()
     session.close()
+    variables.isUpdated = True
 
 
 async def getCardsByUserId(user_id: int):

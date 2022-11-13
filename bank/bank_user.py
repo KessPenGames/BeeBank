@@ -1,6 +1,7 @@
 from database.database import Session
 from models.models import User
 from utils.mine_converters import usernameToUuid
+from utils import variables
 
 
 async def add_user(discord_id: int, mc_uuid: str):
@@ -9,6 +10,7 @@ async def add_user(discord_id: int, mc_uuid: str):
     session.add(user)
     session.commit()
     session.close()
+    variables.isUpdated = True
 
 
 async def getUser(discord_id: int):
@@ -36,6 +38,7 @@ async def updateDiscordId(old_id: int, new_id: int):
         users.update({"discord_id": new_id})
         session.commit()
     session.close()
+    variables.isUpdated = True
 
 
 async def updateMCUuid(discord_id: int, mc_uuid: str):
@@ -45,6 +48,7 @@ async def updateMCUuid(discord_id: int, mc_uuid: str):
         users.update({"mc_uuid": mc_uuid})
         session.commit()
     session.close()
+    variables.isUpdated = True
 
 
 async def removeUser(discord_id: int):
@@ -54,3 +58,4 @@ async def removeUser(discord_id: int):
         session.delete(user)
         session.commit()
     session.close()
+    variables.isUpdated = True

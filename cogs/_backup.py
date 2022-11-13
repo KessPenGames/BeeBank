@@ -15,14 +15,12 @@ class BackupCog(commands.Cog):
     @commands.command()
     async def backup(self, ctx):
         if mainbool.isAuthor(ctx):
-            await backuping()
+            await backuping(True)
             await ctx.send("БД была бэкапнута!")
 
     @tasks.loop(hours=1)
     async def backup_task(self):
-        print("DB Backup started...")
         await backuping()
-        print("Backup over!")
 
 
 def setup(bot=commands.Bot):
