@@ -8,8 +8,6 @@ from exceptions.bank_exception import CardNotFound, NotEnoughMoney
 from generators.card_image.card import generate, random_img
 from logs_handlers import discord_logs
 from utils.mine_converters import uuidToUsername
-from views import buttons
-from utils import check as mainbool
 
 
 class CommandsCog(commands.Cog):
@@ -70,15 +68,6 @@ class CommandsCog(commands.Cog):
             ctx.guild.get_member(receiver.user.discord_id), 2,
             receiver.name, str(amount)
         )
-
-    @commands.command()
-    async def send(self, ctx: commands.Context):
-        if mainbool.isAuthor(ctx):
-            await ctx.channel.purge(limit=10)
-            await ctx.send(
-                "Приветствую вас в меню управлением **BeeBank**, здесь представлены основные,"
-                " доступные вам функции.", view=buttons.BankButtons()
-            )
 
     @commands.command()
     @commands.has_role(config.getAttr("banker-role-id"))

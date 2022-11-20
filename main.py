@@ -11,7 +11,8 @@ cogs = [
     "get_commands",
     "create_commands",
     "update_commands",
-    "backup"
+    "backup",
+    "bank_message"
 ]
 cog = "cogs._"
 
